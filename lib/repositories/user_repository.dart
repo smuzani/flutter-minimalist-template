@@ -2,6 +2,7 @@ import 'dart:async';
 import '../models/user_model.dart';
 import '../services/user_service.dart';
 import '../services/local_storage_service.dart';
+import '../utils/app_logger.dart';
 
 class UserRepository {
   final UserService _userService;
@@ -19,11 +20,11 @@ class UserRepository {
     if (!forceRefresh) {
       final cachedUsers = await _localStorageService.getCachedUsers();
       if (cachedUsers != null && cachedUsers.isNotEmpty) {
-        print('Using cached users data: ${cachedUsers.length} users');
+        AppLogger.info('Using cached users data: ${cachedUsers.length} users');
         
         // If we have fewer cached users than requested, force refresh
         if (cachedUsers.length < count) {
-          print('Cached users count (${cachedUsers.length}) is less than requested count ($count), forcing refresh');
+          AppLogger.info('Cached users count (${cachedUsers.length}) is less than requested count ($count), forcing refresh');
           return _fetchAndCacheUsers(count);
         }
         
@@ -38,23 +39,23 @@ class UserRepository {
   // Helper to fetch and cache users
   Future<List<UserModel>> _fetchAndCacheUsers(int count) async {
     try {
-      print('Fetching users from network: requesting $count users');
+      AppLogger.info('Fetching users from network: requesting $count users');
       final users = await _userService.getUsers(count: count);
       
       // Cache the data for future use if we have a successful result
       if (users.isNotEmpty) {
         await _localStorageService.cacheUsers(users);
-        print('Cached ${users.length} users');
+        AppLogger.info('Cached ${users.length} users');
       }
       
       return users;
     } catch (e) {
-      print('Network error: $e');
+      AppLogger.error('Network error', e);
       
       // Always try to return cached data as fallback in case of error
       final cachedUsers = await _localStorageService.getCachedUsers();
       if (cachedUsers != null && cachedUsers.isNotEmpty) {
-        print('Falling back to cached data: ${cachedUsers.length} users');
+        AppLogger.info('Falling back to cached data: ${cachedUsers.length} users');
         return cachedUsers;
       }
       
@@ -69,19 +70,19 @@ class UserRepository {
       // Try to get from cache first
       final cachedUser = await _localStorageService.getCachedUserById(userId);
       if (cachedUser != null) {
-        print('Using cached user details for: $userId');
+        AppLogger.debug('Using cached user details for: $userId');
         return cachedUser;
       }
       
       // If not in cache, fetch from network
-      print('Fetching user details from network for: $userId');
+      AppLogger.info('Fetching user details from network for: $userId');
       final user = await _userService.getUserDetails(userId);
       
       // Update the cache with this single user
       await _localStorageService.cacheUsers([user]);
       return user;
     } catch (e) {
-      print('Error getting user details: $e');
+      AppLogger.error('Error getting user details', e);
       // Let the service provide the user (it will return mock data if needed)
       return _userService.getUserDetails(userId);
     }
@@ -90,6 +91,6 @@ class UserRepository {
   // Clear all cached data
   Future<void> clearCache() async {
     await _localStorageService.clearCache();
-    print('Cache cleared');
+    AppLogger.info('Cache cleared');
   }
 } 

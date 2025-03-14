@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import '../models/user_model.dart';
+import '../utils/app_logger.dart';
 
 class UserService {
   final String baseUrl = 'https://randomuser.me/api/';
@@ -29,7 +30,7 @@ class UserService {
       // Use a properly configured HTTP request with results parameter
       final uri = Uri.parse('$baseUrl?results=$count');
       
-      print('Fetching $count users from: $uri');
+      AppLogger.info('Fetching $count users from: $uri');
       
       final request = http.Request('GET', uri);
       request.headers['Accept'] = 'application/json';
@@ -41,22 +42,22 @@ class UserService {
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         final results = jsonData['results'] as List;
-        print('Received ${results.length} users from API');
+        AppLogger.info('Received ${results.length} users from API');
         return results.map((user) => UserModel.fromJson(user)).toList();
       } else {
         throw Exception('Failed to load users: HTTP ${response.statusCode}');
       }
     } on SocketException catch (e) {
-      print('Socket exception: $e');
+      AppLogger.warning('Socket exception: $e');
       return _getMockUsers(count);
     } on http.ClientException catch (e) {
-      print('Client exception: $e');
+      AppLogger.warning('Client exception: $e');
       return _getMockUsers(count);
     } on TimeoutException catch (e) {
-      print('Timeout exception: $e');
+      AppLogger.warning('Timeout exception: $e');
       return _getMockUsers(count);
     } catch (e) {
-      print('Unknown error occurred: $e');
+      AppLogger.error('Unknown error occurred', e);
       return _getMockUsers(count);
     }
   }
@@ -86,7 +87,7 @@ class UserService {
         throw Exception('Failed to load user details: HTTP ${response.statusCode}');
       }
     } catch (e) {
-      print('Error getting user details: $e');
+      AppLogger.error('Error getting user details', e);
       // Return a mock user if we can't get the real one
       return _getMockUser(userId);
     }
@@ -94,7 +95,7 @@ class UserService {
   
   // Provide mock data when the API is unavailable
   List<UserModel> _getMockUsers(int count) {
-    print('Generating $count mock users');
+    AppLogger.info('Generating $count mock users');
     List<UserModel> mockUsers = [];
     for (int i = 0; i < count; i++) {
       mockUsers.add(_getMockUser('mock-$i'));

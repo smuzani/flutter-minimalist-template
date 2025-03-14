@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../utils/app_logger.dart';
 
 class UserModel {
   final String uuid;
@@ -60,8 +61,8 @@ class UserModel {
         dateOfBirth: _parseDateSafely(json['dob']?['date']),
       );
     } catch (e) {
-      print('Error parsing user data: $e');
-      print('Problematic JSON: $json');
+      AppLogger.error('Error parsing user data: $e');
+      AppLogger.error('Problematic JSON: $json');
       // Return fallback user data if parsing fails
       return UserModel(
         uuid: 'error-${DateTime.now().millisecondsSinceEpoch}',
@@ -121,7 +122,7 @@ class UserModel {
     try {
       return UserModel.fromJson(json.decode(jsonString));
     } catch (e) {
-      print('Error parsing JSON string: $e');
+      AppLogger.error('Error parsing JSON string: $e');
       return UserModel(
         uuid: 'error-${DateTime.now().millisecondsSinceEpoch}',
         firstName: 'Error',

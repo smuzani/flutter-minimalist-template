@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 import '../repositories/user_repository.dart';
+import '../utils/app_logger.dart';
 
 // States to represent different UI states
 enum ViewState { initial, loading, loaded, error }
@@ -40,7 +40,7 @@ class UsersNotifier extends StateNotifier<AsyncValue<List<UserModel>>> {
   Future<void> loadUsers({bool forceRefresh = false, int count = defaultUserCount}) async {
     try {
       state = const AsyncValue.loading();
-      print('Loading $count users, forceRefresh: $forceRefresh');
+      AppLogger.info('Loading $count users, forceRefresh: $forceRefresh');
       final users = await _repository.getUsers(forceRefresh: forceRefresh, count: count);
       
       // Update the user cache
@@ -51,10 +51,10 @@ class UsersNotifier extends StateNotifier<AsyncValue<List<UserModel>>> {
       }
       _ref.read(userCacheProvider.notifier).state = updatedCache;
       
-      print('Loaded ${users.length} users');
+      AppLogger.info('Loaded ${users.length} users');
       state = AsyncValue.data(users);
     } catch (e, stackTrace) {
-      print('Error loading users: $e');
+      AppLogger.error('Error loading users', e, stackTrace);
       state = AsyncValue.error(e, stackTrace);
     }
   }
@@ -81,13 +81,13 @@ class SelectedUserNotifier extends StateNotifier<AsyncValue<UserModel?>> {
       
       if (userCache.containsKey(userId)) {
         // Use the cached user if available
-        print('Using cached user: $userId');
+        AppLogger.debug('Using cached user: $userId');
         state = AsyncValue.data(userCache[userId]);
         return;
       }
       
       // Otherwise fetch from repository
-      print('Fetching user details for: $userId');
+      AppLogger.info('Fetching user details for: $userId');
       final user = await _repository.getUserDetails(userId);
       
       // Update the cache
@@ -98,7 +98,7 @@ class SelectedUserNotifier extends StateNotifier<AsyncValue<UserModel?>> {
       // Update state
       state = AsyncValue.data(user);
     } catch (e, stackTrace) {
-      print('Error selecting user: $e');
+      AppLogger.error('Error selecting user', e, stackTrace);
       state = AsyncValue.error(e, stackTrace);
     }
   }

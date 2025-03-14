@@ -1,7 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as path;
 import '../models/user_model.dart';
+import '../utils/app_logger.dart';
 
 class LocalStorageService {
   static const String usersKey = 'cached_users';
@@ -15,9 +16,9 @@ class LocalStorageService {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'users_database.db');
+    String dbPath = path.join(await getDatabasesPath(), 'users_database.db');
     return await openDatabase(
-      path,
+      dbPath,
       version: 1,
       onCreate: (Database db, int version) async {
         await db.execute(
@@ -48,7 +49,7 @@ class LocalStorageService {
       
       await batch.commit(noResult: true);
     } catch (e) {
-      print('Error caching users: $e');
+      AppLogger.error('Error caching users', e);
     }
   }
 
@@ -64,7 +65,7 @@ class LocalStorageService {
             .toList();
       }
     } catch (e) {
-      print('Error getting cached users: $e');
+      AppLogger.error('Error getting cached users', e);
     }
     return null;
   }
@@ -83,7 +84,7 @@ class LocalStorageService {
         return UserModel.fromJsonString(maps.first['data'] as String);
       }
     } catch (e) {
-      print('Error getting cached user by ID: $e');
+      AppLogger.error('Error getting cached user by ID', e);
     }
     return null;
   }

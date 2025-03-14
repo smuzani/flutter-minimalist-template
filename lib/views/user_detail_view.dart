@@ -6,7 +6,7 @@ import '../models/user_model.dart';
 class UserDetailView extends ConsumerWidget {
   final String? heroTag;
   
-  const UserDetailView({Key? key, this.heroTag}) : super(key: key);
+  const UserDetailView({super.key, this.heroTag});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

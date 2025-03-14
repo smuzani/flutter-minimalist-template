@@ -8,12 +8,12 @@ class NetworkAwareView extends StatelessWidget {
   final VoidCallback onRetry;
 
   const NetworkAwareView({
-    Key? key,
+    super.key,
     required this.child,
     this.offlineChild,
     required this.isOnline,
     required this.onRetry,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class NetworkAwareView extends StatelessWidget {
 
   Widget _buildOfflineBanner(BuildContext context) {
     return Container(
-      color: Colors.orange.withOpacity(0.8),
+      color: Colors.orange.withAlpha(80),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

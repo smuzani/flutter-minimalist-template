@@ -66,7 +66,7 @@ class MyHttpOverrides extends HttpOverrides {
 }
 
 class MyApp extends ConsumerWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -94,7 +94,7 @@ class MyApp extends ConsumerWidget {
 }
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -109,6 +109,9 @@ class HomeScreen extends ConsumerWidget {
               // Get the repository and clear the cache
               final repository = ref.read(userRepositoryProvider);
               await repository.clearCache();
+              
+              // Check if still mounted before using context
+              if (!context.mounted) return;
               
               // Show a snackbar to confirm
               ScaffoldMessenger.of(context).showSnackBar(

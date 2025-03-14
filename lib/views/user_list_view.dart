@@ -9,12 +9,11 @@ import 'network_aware_view.dart';
 final isMockDataProvider = StateProvider<bool>((ref) => false);
 
 class UserListView extends ConsumerWidget {
-  const UserListView({Key? key}) : super(key: key);
+  const UserListView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final usersState = ref.watch(usersProvider);
-    final isMockData = ref.watch(isMockDataProvider);
     
     return Scaffold(
       appBar: AppBar(
