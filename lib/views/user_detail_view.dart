@@ -61,19 +61,30 @@ class UserDetailView extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: Hero(
-              tag: 'user-avatar-${user.uuid}',
-              child: CircleAvatar(
-                radius: 80,
-                backgroundImage: NetworkImage(user.pictureUrl),
-                onBackgroundImageError: (_, __) {
-                  // Handle image load error silently
-                },
-                child: user.pictureUrl.contains('placeholder') 
-                    ? const Icon(Icons.person, size: 80) 
-                    : null,
-              ),
-            ),
+            child: heroTag != null 
+                ? Hero(
+                    tag: heroTag!,
+                    child: CircleAvatar(
+                      radius: 80,
+                      backgroundImage: NetworkImage(user.pictureUrl),
+                      onBackgroundImageError: (_, __) {
+                        // Handle image load error silently
+                      },
+                      child: user.pictureUrl.contains('placeholder') 
+                          ? const Icon(Icons.person, size: 80) 
+                          : null,
+                    ),
+                  )
+                : CircleAvatar(
+                    radius: 80,
+                    backgroundImage: NetworkImage(user.pictureUrl),
+                    onBackgroundImageError: (_, __) {
+                      // Handle image load error silently
+                    },
+                    child: user.pictureUrl.contains('placeholder') 
+                        ? const Icon(Icons.person, size: 80) 
+                        : null,
+                  ),
           ),
           const SizedBox(height: 24),
           _buildInfoCard(

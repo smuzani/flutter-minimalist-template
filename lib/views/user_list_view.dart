@@ -122,21 +122,27 @@ class UserListView extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: NetworkImage(user.thumbnailUrl),
-          radius: 25,
-          onBackgroundImageError: (_, __) {
-            // Handle image load error
-          },
-          child: NetworkImage(user.thumbnailUrl).toString().contains('placeholder') 
-              ? const Icon(Icons.person, size: 25) 
-              : null,
+        leading: Hero(
+          tag: heroTag,
+          child: CircleAvatar(
+            backgroundImage: NetworkImage(user.thumbnailUrl),
+            radius: 25,
+            onBackgroundImageError: (_, __) {
+              // Handle image load error
+            },
+            child: NetworkImage(user.thumbnailUrl).toString().contains('placeholder') 
+                ? const Icon(Icons.person, size: 25) 
+                : null,
+          ),
         ),
         title: Text(user.fullName),
         subtitle: Text(user.email),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: () {
+          // First select the user
           ref.read(selectedUserProvider.notifier).selectUser(user.uuid);
+          
+          // Then navigate to detail view
           Navigator.push(
             context,
             MaterialPageRoute(

@@ -37,12 +37,21 @@ void main() async {
     HttpOverrides.global = MyHttpOverrides();
   }
   
+  // Create our services
+  final userService = UserService();
+  final localStorageService = LocalStorageService();
+  final userRepository = UserRepository(
+    userService: userService,
+    localStorageService: localStorageService,
+  );
+
   runApp(
     ProviderScope(
       overrides: [
-        userRepositoryProvider.overrideWithProvider(userRepositoryOverride),
+        // Override the repository provider with our implementation
+        userRepositoryProvider.overrideWithValue(userRepository),
       ],
-      child: const MainApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -56,8 +65,8 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-class MainApp extends ConsumerWidget {
-  const MainApp({super.key});
+class MyApp extends ConsumerWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -65,11 +74,12 @@ class MainApp extends ConsumerWidget {
       title: 'Random User App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
         appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          elevation: 0,
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+          elevation: 4,
         ),
         cardTheme: CardTheme(
           elevation: 2,
@@ -78,7 +88,40 @@ class MainApp extends ConsumerWidget {
           ),
         ),
       ),
-      home: const UserListView(),
+      home: const HomeScreen(),
+    );
+  }
+}
+
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Random User App'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            tooltip: 'Clear Cache',
+            onPressed: () async {
+              // Get the repository and clear the cache
+              final repository = ref.read(userRepositoryProvider);
+              await repository.clearCache();
+              
+              // Show a snackbar to confirm
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Cache cleared')),
+              );
+              
+              // Refresh the users with a clean cache
+              ref.read(usersProvider.notifier).loadUsers(forceRefresh: true);
+            },
+          ),
+        ],
+      ),
+      body: const UserListView(),
     );
   }
 }
